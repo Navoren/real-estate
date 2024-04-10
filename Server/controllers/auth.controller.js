@@ -1,10 +1,10 @@
 import User from '../models/user.model.js';
-import bcryptjs from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { ApiError } from '../utils/ApiError.js';
 
 export const signup = async (req, res) => {
     const { username, email, password } = req.body;
-    const hashedPassword = bcryptjs.hashSync(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashedPassword });
     try {
         await user.save();
@@ -14,7 +14,4 @@ export const signup = async (req, res) => {
     } catch (error) {
         throw new ApiError(400, error.message);
     }
-    res.status(200).json({
-        message: "Signup success"
-    });
-}
+};
