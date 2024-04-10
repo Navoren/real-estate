@@ -31,13 +31,14 @@ export const signin = async (req, res) => {
             throw new ApiError(400, "Invalid credentials");
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        const { password: userPassword, ...userWithoutPassword } = user.toObject();
+        const { password: userPassword, ...userWithoutPassword } = user._doc;
         res.cookie("accessToken", token, {
             httpOnly: true
         })
-            .status(200).json({
-                message: "User signed in successfully!"
-            }).json(userWithoutPassword);
+        .status(200).json({
+            message: "User signed in successfully!",
+            user: userWithoutPassword,
+          });
 
     } catch (error) {
         throw new ApiError(400, error.message);
