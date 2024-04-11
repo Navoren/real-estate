@@ -15,6 +15,7 @@ function SignUp() {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     try {
+      setLoading(true);
       const res = await fetch('http://localhost:4000/api/v1/auth/signup', {
         method: 'POST',
         headers: {
