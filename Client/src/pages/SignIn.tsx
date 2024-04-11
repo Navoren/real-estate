@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import { SignInStart, SignInFailure, SignInSuccess } from '../redux/user/userSlice.ts';
 import { RootState } from '../redux/store.ts';
+import OAuth from '../components/OAuth.tsx';
 
 function SignIn() {
   const [formData, setFormData] = useState({});
@@ -55,7 +56,7 @@ function SignIn() {
         <button disabled={loading} className="btn btn-wide btn-primary">{loading ? 'Loading' : 'Login'}</button>
         {error && <p className='text-red-500 text-sm'>{error}</p>}
         <hr className='border-[0.2px] w-[15rem] ' />
-        <button className="btn btn-wide btn-error">Login using Google</button>
+        <OAuth />
         <h6 className='text-sm text-gray-400 text-center'>New Here? <Link className='text-blue-300' to={'/sign-up'} >Sign Up</Link> </h6>
       </form>
       
