@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useRef } from 'react'
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
-import { UpdateUserFailure, UpdateUserStart, UpdateUserSuccess } from '../redux/user/userSlice';
-import { set } from 'firebase/database';
+import { UpdateUserFailure, UpdateUserStart, UpdateUserSuccess, DeleteUserStart, DeleteUserSuccess, DeleteUserFailure } from '../redux/user/userSlice';
 function Profile() {
   const fileInput = useRef(null);
   const {currentUser, loading, error} = useSelector((state: any) => state.user);
@@ -72,6 +71,25 @@ function Profile() {
       dispatch(UpdateUserFailure(error.message));
     }
   };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(DeleteUserStart());
+      const res = await fetch(`http://localhost:4000/api/v1/users/delete/${currentUser.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if(data.message === 'User deleted successfully') {
+        dispatch(DeleteUserSuccess());
+      }
+      else {
+        dispatch(DeleteUserFailure(data.message));
+        return;
+      }
+    } catch (error: any) {
+      dispatch(DeleteUserFailure(error.message));
+    }
+  }
   return (
     <div className='rounded-xl sm:w-min mx-auto my-20 items-center sm:shadow-md '>
       <form action="" onSubmit={handleSubmit}  className='flex flex-col gap-4 p-8 rounded-xl mx-auto my-20 px-24 items-center'>
@@ -112,7 +130,7 @@ function Profile() {
         <button disabled={loading} className="btn btn-primary"> {loading ? 'Loading...' : 'Update'}</button>
         <button className="btn btn-outline btn-neutral"> Sign Out</button>
           <button className="btn btn-outline btn-secondary"> Create Listing</button>
-          <button className="btn btn-outline btn-error"> Delete Account</button>
+          <button onClick={ handleDelete} className="btn btn-outline btn-error"> Delete Account</button>
         </div>
         <div className="message-box">
           {error && <p className="text-red-700">{error}</p>}
