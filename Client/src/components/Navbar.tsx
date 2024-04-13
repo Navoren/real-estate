@@ -2,7 +2,8 @@ import { NavLink } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
 function Navbar() {
-  const {currentUser} = useSelector((state:any) => state.user)
+  const { currentUser } = useSelector((state: any) => state.user)
+  
   return (
     <div className="navbar bg-base-100 drop-shadow-sm">
     <div className="navbar-start">
@@ -12,7 +13,6 @@ function Navbar() {
         </div>
         <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
           <li><NavLink to={'/'}>Home</NavLink></li>
-          {/* <li><NavLink to={'/sign-in'}>Sign In</NavLink></li> */}
           <li><NavLink to={'/about'}>About</NavLink></li>
         </ul>
       </div>

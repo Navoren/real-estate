@@ -1,14 +1,13 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-export interface userState {
-    currentUser: null | string,
-    error: null | string,
-    loading: boolean,
-    
+export interface UserState {
+    currentUser: string | null;
+    error: string | null;
+    loading: boolean;
 }
 
-const initialState: userState = {
+const initialState: UserState = {
     currentUser: null,
     error: null,
     loading: false,
@@ -25,7 +24,6 @@ export const userSlice = createSlice({
             state.currentUser = action.payload
             state.error = null
             state.loading = false
-    
         },
         SignInFailure: (state, action: PayloadAction<string>) => {
             state.error = action.payload
@@ -34,6 +32,6 @@ export const userSlice = createSlice({
     }
 });
 
-export const { SignInFailure, SignInStart, SignInSuccess} = userSlice.actions
+export const { SignInFailure, SignInStart, SignInSuccess } = userSlice.actions;
 
-export default userSlice.reducer
+export default userSlice.reducer;
