@@ -13,7 +13,7 @@ function Profile() {
   console.log(filePer);
   console.log(file);
   
-  const [formData, setFromData] = useState({});
+  const [formData, setFormData] = useState({});
   
 
   useEffect(() => {
@@ -22,26 +22,33 @@ function Profile() {
     }
   }, [file]);
 
-  const handleFileUpload = async (file: any) => {
+  const handleFileUpload = (file: any) => {
     const storage = getStorage(app);
-    const fileName = new Date().getTime + file.name;
+    const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
-    const uplaodTask = uploadBytesResumable(storageRef, file);
-    uplaodTask.on('state_changed', (snapshot) => {
-      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      setFilePer(Math.round(progress));
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setFilePer(Math.round(progress));
+      },
       (error: any) => {
         console.log(error);
         setFileUploadError(true);
-        () => {
-          getDownloadURL(uplaodTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-            setFromData({...formData, avatar: downloadURL});
-          }
-    )}
-      };
-    }
-  )};
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+          setFormData({ ...formData, avatar: downloadURL })
+        );
+      }
+    );
+  };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
   return (
     <div className='rounded-xl sm:w-min mx-auto my-20 items-center sm:shadow-md '>
       <form action="" className='flex flex-col gap-4 p-8 rounded-xl mx-auto my-20 px-24 items-center'>
@@ -49,13 +56,26 @@ function Profile() {
         <img
           onClick={() => fileInput.current?.click()}
           onChange={(e) => setFile(e.target.files[0])}
-          src={currentUser?.avatar || 'https://www.pngitem.com/pimgs/m/146-1462217_profile-icon-png-image-free-download-searchpng-employee.png'}
+          src={currentUser?.avatar || 'https://imgs.search.brave.com/vNq2jFE3XACsBNx6XivyUP5r0PYaPjic3GaSsrkaloE/rs:fit:860:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE3LzM0LzY3/LzM2MF9GXzIxNzM0/Njc4Ml83WHBDVHQ4/YkxOSnF2VkFhRFpK/d3Zaam0wZXBRbWo2/ai5qcGc'}
           alt="avatar"
-        className='rounded-full w-38 h-36 border-2 border-black shadow-xl cursor-pointer'/>
+          className='rounded-full w-38 h-36 border-2 border-black shadow-xl cursor-pointer' />
+        <p className='text-sm self-center'>
+          {fileUploadError ? (
+            <span className='text-red-700'>
+              Error Image upload (image must be less than 2 mb)
+            </span>
+          ) : filePer > 0 && filePer < 100 ? (
+            <span className='text-slate-700'>{`Uploading ${filePer}%`}</span>
+          ) : filePer === 100 ? (
+            <span className='text-green-700'>Image successfully uploaded!</span>
+          ) : (
+            ''
+          )}
+        </p>
       <h1 className="text-xl font-semibold ">Hello, <span className='text-slate-500'>{currentUser.username}</span></h1>
       <label className="input input-bordered flex items-center gap-2 sm:w-full">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" /></svg>
-        <input type="text" className="grow" placeholder="Username" id='username' value={currentUser.username} disabled/>
+        <input type="text" className="grow" placeholder="Username" id='username' defaultValue={currentUser.username} disabled/>
       </label>
       <label className="input input-bordered flex items-center gap-2 sm:w-full">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>
