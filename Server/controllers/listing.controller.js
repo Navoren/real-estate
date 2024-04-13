@@ -1,0 +1,11 @@
+export const createListing = async (req, res, next) => {
+    try {
+        const listing = await Listing.create(req.body);
+        return res.status(201).json({
+            success: true,
+            listing,
+        });
+    } catch (error) {
+        throw new ApiError(400, error.message);
+    }
+}

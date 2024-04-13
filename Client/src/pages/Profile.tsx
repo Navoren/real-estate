@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useRef } from 'react'
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
-import { UpdateUserFailure, UpdateUserStart, UpdateUserSuccess, DeleteUserStart, DeleteUserSuccess, DeleteUserFailure } from '../redux/user/userSlice';
+import { UpdateUserFailure, UpdateUserStart, UpdateUserSuccess, DeleteUserStart, DeleteUserSuccess, DeleteUserFailure , SignOutStart, SignOutFailure, SignOutSuccess} from '../redux/user/userSlice';
 function Profile() {
   const fileInput = useRef(null);
   const {currentUser, loading, error} = useSelector((state: any) => state.user);
@@ -79,7 +79,7 @@ function Profile() {
         method: 'DELETE',
       });
       const data = await res.json();
-      if(data.message === 'User deleted successfully') {
+      if (data.message === 'User deleted successfully') {
         dispatch(DeleteUserSuccess());
       }
       else {
@@ -88,6 +88,22 @@ function Profile() {
       }
     } catch (error: any) {
       dispatch(DeleteUserFailure(error.message));
+    }
+  };
+  const handleSignOut = async () => {
+    try {
+      dispatch(SignOutStart());
+      const res = await fetch('http://localhost:4000/api/v1/auth/signout');
+      const data = await res.json();
+      if (data.success === true) {
+        dispatch(SignOutSuccess());
+      }
+      else {
+        dispatch(SignOutFailure(data.message));
+        return;
+      }
+    } catch (error: any) {
+      dispatch(SignOutFailure(error.message));
     }
   }
   return (
@@ -128,7 +144,7 @@ function Profile() {
         </label>
         <div className="alt-buttons grid grid-rows-2 grid-flow-col gap-1">
         <button disabled={loading} className="btn btn-primary"> {loading ? 'Loading...' : 'Update'}</button>
-        <button className="btn btn-outline btn-neutral"> Sign Out</button>
+        <button onClick={handleSignOut} className="btn btn-outline btn-neutral"> Sign Out</button>
           <button className="btn btn-outline btn-secondary"> Create Listing</button>
           <button onClick={ handleDelete} className="btn btn-outline btn-error"> Delete Account</button>
         </div>
@@ -143,3 +159,4 @@ function Profile() {
 }
 
 export default Profile
+
