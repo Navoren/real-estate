@@ -1,9 +1,9 @@
 function CreateListing() {
 return (
     <main>
-        <div className='rounded-xl sm:w-min mx-auto my-20 items-center sm:shadow-md'>
-    <form action=""  className='sm:flex gap-4 px-8 rounded-xl mx-auto '>
-                <div className='flex flex-col gap-4 p-8 rounded-xl mx-auto'>
+        <div className='rounded-xl sm:w-screen mx-auto my-20 items-center'>
+    <form action=""  className='sm:flex  px-8 rounded-xl mx-auto '>
+                <div className='flex flex-col gap-4 p-8 rounded-xl mx-auto sm:w-1/2'>
                 <h1 className='text-3xl font-semibold p-3 md:max-w-2xl'>Create Listing</h1>
     <label className="input input-bordered flex items-center gap-2 w-full">
         <input type="text" className="grow" placeholder="Name" id='name' defaultValue="" />
