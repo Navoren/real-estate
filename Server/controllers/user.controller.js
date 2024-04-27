@@ -1,4 +1,6 @@
 import bcrypt from 'bcryptjs';
+import { ApiError } from '../utils/ApiError.js';
+import User from '../models/user.model.js';
 
 export const test = (req, res) => {
     res.send("Hello from user controller")
@@ -13,7 +15,7 @@ export const updateUser = async (req, res, next) => {
             req.body.password = bcrypt.hashSync(req.body.password, 10)
         }
 
-        const upadtedUser = await User.findByIdAndUpdate(req.params.id, {
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, {
             $set: {
                 username: req.body.username,
                 email: req.body.email,
@@ -22,7 +24,7 @@ export const updateUser = async (req, res, next) => {
             }
         }, { new: true });
 
-        const { password, ...rest } = upadtedUser._doc;
+        const { password, ...rest } = updatedUser._doc;
         res.status(200).json(rest);
     } catch (error) {
         throw new ApiError(400, error.message);
@@ -35,7 +37,8 @@ export const deleteUser = async (req, res, next) => {
     }
     try {
         await User.findByIdAndDelete(req.params.id);
-        res.status(200).json("User has been deleted...").clearCookie("accessToken");
+        res.clearCookie("accessToken");
+        res.status(200).json("User has been deleted...");
     } catch (error) {
         throw new ApiError(400, error.message);
     }

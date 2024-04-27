@@ -23,13 +23,13 @@ function Navbar() {
       <div className="navbar-end flex-none gap-2">
         <input type="text" placeholder="Search" className="input input-bordered w-12 md:w-auto" />
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <div className="avatar">
+        <div className="avatar-block">
           <NavLink to={'/profile'}>
             {currentUser ? (
               <img
                 src={currentUser.avatar}
                 alt="avatar"
-                className='w-8 h-8 rounded-full'
+                className='w-10 h-10 rounded-full border-2 border-black cursor-pointer'
               />
             ) : (
               <button className='font-semibold hover:bg-slate-200 rounded-xl p-3 transition delay-75'>Sign In</button>

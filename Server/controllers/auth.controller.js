@@ -2,7 +2,6 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import { ApiError } from '../utils/ApiError.js';
 import jwt from 'jsonwebtoken';
-import cookieParser from 'cookie-parser';
 
 export const signup = async (req, res) => {
     const { username, email, password } = req.body;
@@ -18,7 +17,7 @@ export const signup = async (req, res) => {
     }
 };
 
-
+//TODO: CHANGE THE HTTPONLY TO TRUE IN PRODUCTION
 export const signin = async (req, res) => { 
     const { email, password } = req.body;
     try {
@@ -30,10 +29,11 @@ export const signin = async (req, res) => {
         if (!isMatch) {
             throw new ApiError(400, "Invalid credentials");
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
         const { password: userPassword, ...userWithoutPassword } = user._doc;
         res.cookie("accessToken", token, {
-            httpOnly: true
+            httpOnly: true,
+            sameSite: "none",
         })
         .status(200).json({
             message: "User signed in successfully!",

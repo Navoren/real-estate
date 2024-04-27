@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 export interface UserState {
-    currentUser: string | null;
-    error: string | null;
+    currentUser: any | null;
+    error: any | null;
     loading: boolean;
 }
 
@@ -20,25 +21,25 @@ export const userSlice = createSlice({
         SignInStart: (state) => {
             state.loading = true
         },
-        SignInSuccess: (state, action: PayloadAction<string>) => {
-            state.currentUser = action.payload
+        SignInSuccess: (state, action: PayloadAction<any>) => {
+            state.currentUser = action.payload.user
             state.error = null
             state.loading = false
         },
-        SignInFailure: (state, action: PayloadAction<string>) => {
-            state.error = action.payload
+        SignInFailure: (state, action: PayloadAction<any>) => {
+            state.error = action.payload.user
             state.loading = false
         },
         UpdateUserStart: (state) => {
             state.loading = true
         },
-        UpdateUserSuccess: (state, action: PayloadAction<string>) => {
-            state.currentUser = action.payload
+        UpdateUserSuccess: (state, action: PayloadAction<any>) => {
+            state.currentUser = action.payload.user
             state.error = null
             state.loading = false
         },
-        UpdateUserFailure: (state, action: PayloadAction<string>) => {
-            state.error = action.payload
+        UpdateUserFailure: (state, action: PayloadAction<any>) => {
+            state.error = action.payload.user
             state.loading = false
         },
         DeleteUserStart: (state) => {         
@@ -49,8 +50,8 @@ export const userSlice = createSlice({
             state.error = null
             state.loading = false
         },
-        DeleteUserFailure: (state, action: PayloadAction<string>) => {       
-            state.error = action.payload
+        DeleteUserFailure: (state, action: PayloadAction<any>) => {       
+            state.error = action.payload.user
             state.loading = false
         },
         SignOutStart: (state) => {
@@ -61,8 +62,8 @@ export const userSlice = createSlice({
             state.error = null
             state.loading = false
         },
-        SignOutFailure: (state, action: PayloadAction<string>) => {
-            state.error = action.payload
+        SignOutFailure: (state, action: PayloadAction<any>) => {
+            state.error = action.payload.user
             state.loading = false
         },
     }
