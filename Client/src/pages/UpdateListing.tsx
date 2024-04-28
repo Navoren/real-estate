@@ -1,14 +1,14 @@
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-    import { useState } from "react"
+    import { useEffect, useState } from "react"
     import { app } from "../firebase";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-function CreateListing() {
+function UpdateListing() {
     const { currentUser } = useSelector((state: any) => state.user);
     const navigate = useNavigate();
+    const params = useParams();
         const [formData, setFormData] = useState({
             imageUrls: [],
             name: '',
@@ -30,6 +30,20 @@ function CreateListing() {
     const [error, setError] = useState<any>(null);
     const [imageUploadError, setImageUploadError] = useState(false);
     const [imageUploadErrorMsg, setImageUploadErrorMsg] = useState('');
+    useEffect(() => {
+        const fetchListing = async () => {
+            const listingId = params.listingId;
+            const res = await fetch(`http://localhost:4000/api/v1/listing/get/${listingId}`);
+            const data = await res.json();
+            if (data.success === false) {
+            console.log(data.message);
+            return;
+        }
+        setFormData(data);
+        };
+        fetchListing();
+    }, []);
+    
 
         const handleImageSubmit = () => {
             if (images.length > 0 && images.length + formData.imageUrls.length < 7) {
@@ -131,7 +145,7 @@ function CreateListing() {
             if (+formData.regularPrice < +formData.discountPrice) setError('Discount price must be lower than regular price');
             setLoading(true);
             setError(false);
-            const res = await fetch('http://localhost:4000/api/v1/listing/create', {
+            const res = await fetch(`http://localhost:4000/api/v1/listing/update/${params.listingId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -159,7 +173,7 @@ function CreateListing() {
             <div className='rounded-xl sm:w-screen mx-auto my-20 items-center'>
         <form onSubmit={handleSubmit} action=""  className='sm:flex  px-8 rounded-xl mx-auto '>
                     <div className='flex flex-col gap-4 p-8 rounded-xl mx-auto sm:w-1/2'>
-                    <h1 className='text-3xl font-semibold p-3 md:max-w-2xl'>Create Listing</h1>
+                    <h1 className='text-3xl font-semibold p-3 md:max-w-2xl'>Update Listing</h1>
         <label className="input input-primary flex items-center gap-2 w-full">
             <input type="text" className="grow" placeholder="Name" id='name' required value={formData.name} onChange={handleChange} />
         </label>
@@ -277,7 +291,7 @@ function CreateListing() {
                         <button
                             disabled={loading || uploading}
                             className="btn btn-active btn-primary text-white"
-                        >{loading ? 'Creating...' : 'Create Listing'}</button>
+                        >{loading ? 'Update...' : 'Update Listing'}</button>
                         <p className='text-red-700 text-sm font-bold text-center'>
                             {imageUploadErrorMsg && error || imageUploadError}
                         </p>
@@ -290,4 +304,4 @@ function CreateListing() {
     )
     }
 
-    export default CreateListing
+    export default UpdateListing

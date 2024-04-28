@@ -215,7 +215,8 @@ function Profile() {
         <div>
           <h1 className='text-xl font-semibold'>{listing.title}</h1>
           <p className='text-slate-400'>{listing.description}</p>
-          <button onClick={() => handleDeleteListing(listing._id)} className='btn btn-link text-red-500'>Delete</button>
+            <button onClick={() => handleDeleteListing(listing._id)} className='btn btn-link text-red-500'>Delete</button>
+            <Link to={`/update-listing/${listing._id}`}><button className='btn btn-link text-green-500'>Edit</button></Link>        
         </div>
         </div>
       </Link>

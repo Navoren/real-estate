@@ -45,3 +45,15 @@ export const updateListing = async (req, res, next) => {
         throw new ApiError(400, error.message);
     }
 }
+
+export const getListing = async (req, res, next) => { 
+    try {
+        const listing = await Listing.findById(req.params.id);
+        if(!listing) {
+            throw new ApiError(404, "Listing not found");
+        }
+        res.status(200).json(listing);
+    } catch (error) {
+        throw new ApiError(400, error.message);
+    }
+}
