@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
@@ -13,6 +14,8 @@ function Profile() {
   const [filePer, setFilePer] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showListingError, setShowListingError] = useState(false);
+  const [userListing, setUserListing] = useState<any>([]);
 
   // console.log(filePer);
   // console.log(file);
@@ -118,10 +121,42 @@ function Profile() {
   const handleClick = () => {
     fileInput.current?.click();
   };
+
+  const handleShowListings = async () => { 
+    try {
+      setShowListingError(false);
+      const res = await fetch(`http://localhost:4000/api/v1/listing/${currentUser._id}`);
+      const data = await res.json();
+      if(data.success === false) {
+        setShowListingError(data.message);
+        return;
+      }
+      setUserListing(data);
+    } catch (error: any) {
+      setShowListingError(error.message);
+    }
+  };
+
+  const handleDeleteListing = async (listingId: any) => { 
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/listing/delete/${listingId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if(data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      setUserListing((prev: any) => prev.filter((listing: any) => listing._id !== listingId));
+    } catch (error: any) {
+      console.log(error.message);
+      
+    }
+  };
   
   return (
-    <div className='rounded-xl sm:w-min mx-auto my-20 items-center sm:shadow-md '>
-      <form action="" onSubmit={handleSubmit}  className='flex flex-col gap-4 p-8 rounded-xl mx-auto my-20 px-24 items-center'>
+    <div className='rounded-xl sm:w-min mx-auto my-20 px-5 sm:flex flex-cols justify-between gap-8'>
+      <form action="" onSubmit={handleSubmit}  className='flex flex-col gap-4 p-8 rounded-xl sm:shadow-md mx-auto  px-24 items-center '>
         <input type="file" ref={fileInput} hidden accept='image/*'/>
         <img
           onClick={handleClick}
@@ -155,18 +190,44 @@ function Profile() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path fillRule="evenodd" d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z" clipRule="evenodd" /></svg>
         <input type="password" className="grow" placeholder="Password" id='password' onChange={handleChange}  />
         </label>
-        <div className="alt-buttons grid grid-rows-2 grid-flow-col gap-1">
-        <button disabled={loading} className="btn btn-primary"> {loading ? 'Loading...' : 'Update'}</button>
-        <button onClick={handleSignOut} className="btn btn-outline btn-neutral"> Sign Out</button>
+        <div className="alt-buttons grid grid-rows-3 grid-flow-col gap-1 sm:w-full">
+        <button disabled={loading} className="btn btn-primary sm:w-full"> {loading ? 'Loading...' : 'Update'}</button>
+        <button onClick={handleSignOut} className="btn btn-outline btn-neutral"> Sign Out</button>      
+          <button onClick={handleDelete} className="btn btn-link text-red-500 text-xs no-underline"> Delete Account</button>
           <button className="btn btn-outline btn-secondary"> <Link to={"/create-listing"}>Create Listing</Link> </button>
-          <button onClick={ handleDelete} className="btn btn-outline btn-error"> Delete Account</button>
+          <button onClick={handleShowListings} className="btn btn-outline btn-wide"> Show Listings</button>
         </div>
         <div className="message-box">
           <p className="text-red-700">{error ? error : ''}</p>
+          <p className="text-red-700">{showListingError ? showListingError : ''}</p>
           {updateSuccess && <p className="text-green-700">User updated successfully!</p>}
         </div>
       </form>
-      
+      <div className='w-screen h-full p-3'>
+        <h1 className='text-2xl font-semibold'>Your Listings</h1>
+        <p className='text-slate-400 shrink-0'> Here are the list of Properties you listed</p>
+        {userListing && userListing.length > 0 ? (
+  userListing.map((listing: any) => (
+    <div key={listing._id}>
+      <Link to={`/listing/${listing._id}`}>
+      <div className='flex gap-4'>
+        <img src={listing.imageUrls[0]} alt={listing.title} className='w-32 h-32 object-cover rounded-lg' />
+        <div>
+          <h1 className='text-xl font-semibold'>{listing.title}</h1>
+          <p className='text-slate-400'>{listing.description}</p>
+          <button onClick={() => handleDeleteListing(listing._id)} className='btn btn-link text-red-500'>Delete</button>
+        </div>
+        </div>
+      </Link>
+    </div>
+  ))
+) : (
+  <div>
+    <p className='text-slate-300 mt-3'>No Listings till now or click on Show Listings if you have any</p>
+  </div>
+)}
+
+      </div>
     </div>
   )
 }

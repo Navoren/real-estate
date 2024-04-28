@@ -279,7 +279,7 @@ function CreateListing() {
                             className="btn btn-active btn-primary text-white"
                         >{loading ? 'Creating...' : 'Create Listing'}</button>
                         <p className='text-red-700 text-sm font-bold text-center'>
-                                {imageUploadErrorMsg || error}
+                            {imageUploadErrorMsg && error || imageUploadError}
                         </p>
                         
                 </div>
