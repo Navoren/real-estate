@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRef } from 'react'
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -7,9 +7,9 @@ import { app } from '../firebase';
 import { UpdateUserFailure, UpdateUserStart, UpdateUserSuccess, DeleteUserStart, DeleteUserSuccess, DeleteUserFailure , SignOutStart, SignOutFailure, SignOutSuccess} from '../redux/user/userSlice';
 import { Link } from 'react-router-dom';
 function Profile() {
-  const fileInput = useRef(null);
+  const fileInput = useRef<any>(null);
   const {currentUser, loading, error} = useSelector((state: any) => state.user);
-  const [file, setFile] = useState(undefined);
+  const [file, setFile] = useState<any>(undefined);
   const [filePer, setFilePer] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -39,6 +39,7 @@ function Profile() {
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
         setFilePer(Math.round(progress));
       },
       (error: any) => {
@@ -113,14 +114,18 @@ function Profile() {
     } catch (error: any) {
       dispatch(SignOutFailure(error.message));
     }
-  }
+  };
+  const handleClick = () => {
+    fileInput.current?.click();
+  };
+  
   return (
     <div className='rounded-xl sm:w-min mx-auto my-20 items-center sm:shadow-md '>
       <form action="" onSubmit={handleSubmit}  className='flex flex-col gap-4 p-8 rounded-xl mx-auto my-20 px-24 items-center'>
         <input type="file" ref={fileInput} hidden accept='image/*'/>
         <img
-          onClick={() => fileInput.current?.click()}
-          onChange={(e) => setFile(e.target.files[0])}
+          onClick={handleClick}
+          onChange={(e:any) => setFile(e.target.files[0])}
           src={currentUser?.avatar || 'https://imgs.search.brave.com/vNq2jFE3XACsBNx6XivyUP5r0PYaPjic3GaSsrkaloE/rs:fit:860:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE3LzM0LzY3/LzM2MF9GXzIxNzM0/Njc4Ml83WHBDVHQ4/YkxOSnF2VkFhRFpK/d3Zaam0wZXBRbWo2/ai5qcGc'}
           alt="avatar"
           className='rounded-full w-38 h-36 border-2 border-black shadow-xl cursor-pointer' />
