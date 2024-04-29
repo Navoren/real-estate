@@ -12,11 +12,11 @@ import {
     FaBath,
     FaBed,
     FaChair,
-    FaMapMarkedAlt,
     FaMapMarkerAlt,
     FaParking,
     FaShare,
 } from 'react-icons/fa';
+import Contact from '../components/Contact';
   
 function Listing() {
 const params = useParams();
@@ -25,6 +25,7 @@ const [loading, setLoading] = useState(false);
 const [error, setError] = useState(false);
 const [copied, setCopied] = useState(false);
 const [contact, setContact] = useState(false);
+const { currentUser } = useSelector((state:any) => state.user);
 useEffect(() => {
     const fetchListing = async () => {
         try {
@@ -121,7 +122,16 @@ return (
                                     <FaChair className='text-lg' />
                                     {listing.furnished ? 'Furnished' : 'Unfurnished'}
                                 </li>
-                            </ul>
+                                </ul>
+                                <div className='my-5'>
+                                    {currentUser && listing.userRef !== currentUser._id && !contact && (
+                                        <button
+                                            onClick={() => setContact(true)}
+                                            className="btn btn-neutral w-full">Contact LandLord 📞</button>
+                                    )}
+                                    {contact && <Contact listing={listing} />}
+                                    
+                                </div>
                         </div>
                         </div>
                     </div>
