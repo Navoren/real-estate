@@ -1,10 +1,37 @@
 import User from '../models/user.model.js';
+import { asyncHandler } from "../utils/asyncHandler.js";
 import bcrypt from 'bcryptjs';
 import { ApiError } from '../utils/ApiError.js';
 import jwt from 'jsonwebtoken';
 
+const generatedAccessAndRefreshTokens = async (userId) => {
+    try {
+        const user = await User.findById(userId);
+        const accessToken = user.generatedAccessToken();
+        const refreshToken = user.generatedRefreshToken();
+
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+        
+        return {
+            accessToken,
+            refreshToken,
+        };
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating refresh & access token");
+    }
+};
+
 export const signup = async (req, res) => {
     const { username, email, password } = req.body;
+
+    const existiedUser  = await User.findOne({
+        $or : [{username}, {email}]
+    });
+
+    if (existiedUser) {
+        throw new ApiError(409, "User already exists")
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashedPassword });
     try {
@@ -29,15 +56,21 @@ export const signin = async (req, res) => {
         if (!isMatch) {
             throw new ApiError(400, "Invalid credentials");
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        const { password: userPassword, ...userWithoutPassword } = user._doc;
-        res.cookie("accessToken", token, {
+        const { accessToken, newRefreshToken } = await generatedAccessAndRefreshTokens(user._id);
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+        const options = {
             httpOnly: true,
+            // secure: true,
             sameSite: "none",
-        })
-        .status(200).json({
+        };
+        
+        res
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .status(200).json({
             message: "User signed in successfully!",
-            user: userWithoutPassword,
+            user: loggedInUser,
           });
 
     } catch (error) {
@@ -84,11 +117,68 @@ export const google = async (req, res, next) => {
     }
 };
 
-export const signOut = async (req, res, next) => {
-    try {
-      res.clearCookie('accessToken');
-      res.status(200).json('User has been logged out!');
-    } catch (error) {
-      throw new ApiError(400, error.message);
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request")
     }
-  };
+
+    try {
+        const decodedToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    
+        const user = await User.findById(decodedToken?._id);
+    
+        if (!user) {
+            throw new ApiError(401, "Invalid refresh token")
+        }
+    
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(400, "Refresh Token is expired or used")
+        }
+    
+        const options = {
+            httpOnly: true,
+            secure: true,
+        }
+    
+        const { accessToken, newRefreshToken } = await generatedAccessAndRefreshTokens(user._id)
+    
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options).
+            json(new ApiResponse(
+                200, { accessToken, refreshToken: newRefreshToken },
+                "Access Token refreshed Successfully"
+            ));
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid Refresh Token");
+    }
+    
+});
+
+export const signOut = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken: undefined,
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User LoggedOut Successfully"))
+})

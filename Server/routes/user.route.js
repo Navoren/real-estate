@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { test, updateUser, deleteUser, getListingsByUser } from "../controllers/user.controller.js";
-import { verifyToken } from "../utils/verifyUser.js";
+import {verifyToken}  from "../utils/verifyUser.js";
 const router = Router()
 
 router.get("/test", test);
