@@ -56,21 +56,23 @@ export const signin = async (req, res) => {
         if (!isMatch) {
             throw new ApiError(400, "Invalid credentials");
         }
-        const { accessToken, newRefreshToken } = await generatedAccessAndRefreshTokens(user._id);
+        const { accessToken, refreshToken } = await generatedAccessAndRefreshTokens(user._id);
         const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
         const options = {
             httpOnly: true,
-            // secure: true,
+            secure: true,
             sameSite: "none",
         };
         
         res
             .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
+            .cookie("refreshToken", refreshToken, options)
             .status(200).json({
             message: "User signed in successfully!",
-            user: loggedInUser,
+                user: loggedInUser,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
           });
 
     } catch (error) {
@@ -164,6 +166,7 @@ export const signOut = asyncHandler(async (req, res) => {
         {
             $set: {
                 refreshToken: undefined,
+                accessToken : undefined,
             }
         },
         {

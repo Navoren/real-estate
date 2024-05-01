@@ -17,7 +17,6 @@ function SignIn() {
       [e.target.id]: e.target.value,
     })
   }
-  const accessToken = localStorage.getItem('accessToken');
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
@@ -27,7 +26,6 @@ function SignIn() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: accessToken ? `Bearer ${accessToken}` : '',
         },
         body: JSON.stringify(formData),
       });
