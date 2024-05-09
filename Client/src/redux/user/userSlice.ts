@@ -67,8 +67,11 @@ export const userSlice = createSlice({
         },
         SignOutSuccess: (state) => {
             state.currentUser = null
+            state.accessToken = null
+            state.refreshToken = null
             state.error = null
             state.loading = false
+            document.cookie = `accessToken=${state.accessToken}; path=/;`
         },
         SignOutFailure: (state, action: PayloadAction<any>) => {
             state.error = action.payload.user

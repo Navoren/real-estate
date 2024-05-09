@@ -44,7 +44,6 @@ export const signup = async (req, res) => {
     }
 };
 
-//TODO: CHANGE THE HTTPONLY TO TRUE IN PRODUCTION
 export const signin = async (req, res) => { 
     const { email, password } = req.body;
     try {
@@ -85,7 +84,7 @@ export const google = async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
-            const token = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: "1d" });
+            const { accessToken, refreshToken } = await generatedAccessAndRefreshTokens(user._id);
             const { password: pass, ...rest } = user._doc;
             res
                 .cookie("accessToken", token, {
@@ -94,6 +93,8 @@ export const google = async (req, res, next) => {
             .status(200).json({
                 message: "User signed in successfully!",
                 user: rest,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
             });
         } else {
             const password = email + process.env.JWT_SECRET;
@@ -102,13 +103,15 @@ export const google = async (req, res, next) => {
             const user = new User({ username: generatedUsername, email, password: hashedPassword, avatar: req.body.photo });
             try {
                 await user.save();
-                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+                const { accessToken, refreshToken } = await generatedAccessAndRefreshTokens(user._id);
                 const { password, ...newUser } = user._doc;
                 res.cookie("accessToken", token, {
                     httpOnly: true
                 }).status(200).json({
                     message: "User signed in successfully!",
                     user: newUser,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
                 });
             } catch (error) {
                 throw new ApiError(400, error.message);
@@ -162,17 +165,17 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
 export const signOut = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
-        req.user._id,
+        req.body._id,
         {
             $set: {
                 refreshToken: undefined,
-                accessToken : undefined,
             }
         },
         {
             new: true
         }
     )
+    // const {accessToken, refreshToken} = await generatedAccessAndRefreshTokens(user._id)
 
     const options = {
         httpOnly: true,
@@ -183,5 +186,5 @@ export const signOut = asyncHandler(async (req, res) => {
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User LoggedOut Successfully"))
+        .json({ message: "User LoggedOut Successfully" })
 })

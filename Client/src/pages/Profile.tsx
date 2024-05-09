@@ -16,15 +16,10 @@ function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingError, setShowListingError] = useState(false);
   const [userListing, setUserListing] = useState<any>([]);
-
-  // console.log(filePer);
-  // console.log(file);
   
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
   
-  // console.log(formData);
-
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
@@ -89,6 +84,7 @@ function Profile() {
       dispatch(DeleteUserStart());
       const res = await fetch(`http://localhost:4000/api/v1/users/delete/${currentUser._id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       const data = await res.json();
       if (data.success === true) {
